@@ -4,8 +4,6 @@ fn main() {
     let data = fs::read_to_string("/home/ap/MyRepos/AoC22/day1/day1_input.txt")
         .expect("Failed to open file");
 
-    let split = data.split('\n');
-
     let mut curr_total: u32 = 0;
     let mut top_total: u32 = 0;
     let mut elf_id: u32 = 1;
@@ -14,7 +12,7 @@ fn main() {
     // .1 is total
     let mut vec_totals: Vec<(u32, u32)> = vec![];
 
-    for num in split {
+    for num in data.lines() {
         // Found empty line
         if num.is_empty() {
             if top_total < curr_total {
@@ -31,16 +29,6 @@ fn main() {
 
     println!("Top total {}", top_total);
     vec_totals.sort_by_key(|&w| std::cmp::Reverse(w.1));
-
-    // println!(
-    //     " Top 3: {}-{} {}-{} {}-{}",
-    //     &vec_totals[0].0,
-    //     &vec_totals[0].1,
-    //     &vec_totals[1].0,
-    //     &vec_totals[1].1,
-    //     &vec_totals[2].0,
-    //     &vec_totals[2].1
-    // );
 
     println!(
         "Total of top 3 {}",
