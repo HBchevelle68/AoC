@@ -23,6 +23,30 @@ fn part1(data: &String) {
     println!("Part 1 total: {}", total);
 }
 
+fn part2(data: &String) {
+    let mut vec_lines: Vec<&str> = data.lines().filter(|line| !line.is_empty()).collect();
+
+    let mut total = 0;
+    while !vec_lines.is_empty() {
+        let e1 = vec_lines.pop().unwrap();
+        let e2 = vec_lines.pop().unwrap();
+        let e3 = vec_lines.pop().unwrap();
+
+        println!("{} {} {}", e1, e2, e3);
+        for c in e1.chars() {
+            if e2.contains(c) && e3.contains(c) {
+                println!("Found {} in common", c);
+                total += match c.is_lowercase() {
+                    true => c as u32 - LOWERADJ,
+                    false => c as u32 - UPPERADJ,
+                };
+                break;
+            }
+        }
+    }
+    println!("Part 2 total: {}", total);
+}
+
 fn main() {
     println!("Day 2 AoC22 !");
 
@@ -30,9 +54,7 @@ fn main() {
 
     part1(&data);
 
-    let data = fs::read_to_string("test2_input.txt").expect("Failed to open file");
+    let data = fs::read_to_string("day3_input2.txt").expect("Failed to open file");
 
-    let vec_lines: Vec<&str> = data.split('\n').filter(|line| !line.is_empty()).collect();
-
-    dbg!(vec_lines);
+    part2(&data);
 }
