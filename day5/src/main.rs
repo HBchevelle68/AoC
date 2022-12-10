@@ -6,6 +6,12 @@ struct Move {
     to: u8,
 }
 
+fn parse_crates(data: &str) {
+    let split_data: Vec<&str> = data.rsplit('\n').collect();
+    let num_col = split_data[0]
+    dbg!(split_data);
+}
+
 fn parse_instructions(data: &str) -> Vec<Move> {
     let mut instructions: Vec<Move> = vec![];
     for line in data.split('\n') {
@@ -36,9 +42,10 @@ fn main() {
     let crates = split_data[0].to_owned();
     let instructions = split_data[1].to_owned();
 
-    dbg!(crates);
-    dbg!(&instructions);
+    dbg!(&crates);
+    let crates = parse_crates(&crates);
+    // dbg!(&instructions);
 
-    let instructions = parse_instructions(&instructions);
-    dbg!(instructions);
+    //let instructions = parse_instructions(&instructions);
+    // dbg!(instructions);
 }
