@@ -1,21 +1,35 @@
 use std::fs;
 #[derive(Debug)]
 struct Move {
-    mov: u8,
-    from: u8,
-    to: u8,
+    mov: usize,
+    from: usize,
+    to: usize,
 }
 
-fn parse_crates(data: &str) {
-    let split_data: Vec<&str> = data.rsplit('\n').collect();
-    let num_col = split_data[0]
-    dbg!(split_data);
+fn parse_crates(data: &str) -> Vec<Vec<char>> {
+    let mut split_data: Vec<&str> = data.rsplit('\n').collect();
+    let num_col: usize = split_data[0].split(' ').filter(|c| !c.is_empty()).count();
+
+    split_data.remove(0);
+    let mut crates: Vec<Vec<char>> = vec![vec![]; num_col];
+
+    // Add crates to proper vec
+    for row in split_data {
+        for (idx, col) in (1..((num_col * 3) + (num_col - 1))).step_by(4).enumerate() {
+            let c = row.chars().nth(col).unwrap();
+
+            if c.is_ascii_alphabetic() {
+                crates[idx].push(c);
+            }
+        }
+    }
+    crates
 }
 
 fn parse_instructions(data: &str) -> Vec<Move> {
     let mut instructions: Vec<Move> = vec![];
     for line in data.split('\n') {
-        let nums: Vec<u8> = line
+        let nums: Vec<usize> = line
             .replace("move", "")
             .replace("from", "")
             .replace("to", "")
@@ -33,19 +47,35 @@ fn parse_instructions(data: &str) -> Vec<Move> {
     }
     instructions
 }
+
+fn perform_part1_instructions(inst: &Vec<Move>, mut crates: Vec<Vec<char>>) {
+    // Execute instructions
+    for instruction in inst {
+        for _ in 0..instruction.mov {
+            let tmp = crates[instruction.from - 1].pop().unwrap();
+            crates[instruction.to - 1].push(tmp);
+        }
+    }
+
+    println!(
+        "Part 1 -- {}",
+        crates
+            .iter()
+            .map(|inner| inner.last().unwrap())
+            .collect::<String>()
+    );
+}
 fn main() {
     println!("Day 5 AoC22!");
 
-    let data = fs::read_to_string("test_input.txt").expect("Failed to open file");
+    let data = fs::read_to_string("day5_input.txt").expect("Failed to open file");
 
     let split_data: Vec<String> = data.split("\n\n").map(|s| s.to_string()).collect();
     let crates = split_data[0].to_owned();
     let instructions = split_data[1].to_owned();
 
-    dbg!(&crates);
     let crates = parse_crates(&crates);
-    // dbg!(&instructions);
+    let instructions = parse_instructions(&instructions);
 
-    //let instructions = parse_instructions(&instructions);
-    // dbg!(instructions);
+    perform_part1_instructions(&instructions, crates);
 }
