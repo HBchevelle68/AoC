@@ -65,6 +65,28 @@ fn perform_part1_instructions(inst: &Vec<Move>, mut crates: Vec<Vec<char>>) {
             .collect::<String>()
     );
 }
+
+fn perform_part2_instructions(inst: &Vec<Move>, mut crates: Vec<Vec<char>>) {
+    // Execute instructions
+    for instruction in inst {
+        // There is probably a better way to do this...
+        let mut tmp: Vec<char> = vec![];
+        for _ in 0..instruction.mov {
+            tmp.push(crates[instruction.from - 1].pop().unwrap());
+        }
+        for x in tmp.iter().rev() {
+            crates[instruction.to - 1].push(x.to_owned());
+        }
+    }
+
+    println!(
+        "Part 2 -- {}",
+        crates
+            .iter()
+            .map(|inner| inner.last().unwrap())
+            .collect::<String>()
+    );
+}
 fn main() {
     println!("Day 5 AoC22!");
 
@@ -74,8 +96,12 @@ fn main() {
     let crates = split_data[0].to_owned();
     let instructions = split_data[1].to_owned();
 
-    let crates = parse_crates(&crates);
-    let instructions = parse_instructions(&instructions);
+    let crates_p1 = parse_crates(&crates);
+    let instructions_p1 = parse_instructions(&instructions);
 
-    perform_part1_instructions(&instructions, crates);
+    perform_part1_instructions(&instructions_p1, crates_p1);
+
+    let crates_p2 = parse_crates(&crates);
+    let instructions_p2 = parse_instructions(&instructions);
+    perform_part2_instructions(&instructions_p2, crates_p2);
 }
