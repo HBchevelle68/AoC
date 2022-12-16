@@ -10,22 +10,27 @@ fn is_unique(s: &str) -> Option<(usize, usize, char)> {
     })
 }
 
-fn part1(data: &String) {
+fn find_msg(data: &String, num: usize) {
     let len = data.len();
     let mut i = 0;
-    while (i + 3) < len {
-        let chunk = &data[i..=(i + 3)];
+    while (i + num) < len {
+        let chunk = &data[i..=(i + num)];
         match is_unique(&chunk) {
             None => break,
             Some((_, _, _)) => i += 1,
         }
     }
-    println!("Part 1 -- first marker {}", i + 4);
+    if num == 3 {
+        println!("Part 1 -- first marker {}", i + 4);
+    } else {
+        println!("Part 2 -- Num processed before msg {}", i + 14);
+    }
 }
 
 fn main() {
-    println!("Day 5 AoC22!");
+    println!("Day 6 AoC22!");
 
     let data = fs::read_to_string("day6_input.txt").expect("Failed to open file");
-    part1(&data);
+    find_msg(&data, 4 - 1);
+    find_msg(&data, 14 - 1);
 }
