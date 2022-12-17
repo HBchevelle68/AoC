@@ -7,20 +7,20 @@ enum FileType {
 }
 
 #[derive(Debug)]
-struct FileInfo {
+struct FileInfo<'a> {
     name: String,
     size: u64,
     ftype: FileType,
-    parent:
-    subfiles: Vec<FileInfo>,
-
+    parent: &'a FileInfo<'a>,
+    subfiles: Vec<FileInfo<'a>>,
 }
 
-
-impl FileInfo {
-    fn change_dir(&self, dir: &str) -> FileInfo{}
+impl<'a> FileInfo<'a> {
+    fn change_directory(self, dir: &str) -> Option<&FileInfo> {
+        None
+    }
+    fn add_file(&mut self) {}
 }
-
 
 fn main() {
     println!("Day 7 AoC22!");
