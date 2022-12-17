@@ -8,7 +8,7 @@ enum FileType {
 
 #[derive(Debug)]
 struct FileInfo<'a> {
-    name: String,
+    name: &'a str,
     size: u64,
     ftype: FileType,
     parent: Option<&'a FileInfo<'a>>,
@@ -16,9 +16,14 @@ struct FileInfo<'a> {
 }
 
 impl<'a> FileInfo<'a> {
-    fn new(name: String, size: u64, ftype: FileType, parent: Option<&'a FileInfo<'a>>) -> FileInfo {
+    fn new(
+        name: &str,
+        size: u64,
+        ftype: FileType,
+        parent: Option<&'a FileInfo<'a>>,
+    ) -> FileInfo<'a> {
         FileInfo {
-            name: name,
+            name: 'a name,
             size: size,
             ftype: ftype,
             parent: parent,
@@ -31,10 +36,22 @@ impl<'a> FileInfo<'a> {
     fn add_file(&mut self) {}
 }
 
+fn parse_command(cmd: &str) {}
+
+fn parse_input(data: &str) {
+    let split_data: Vec<&str> = data.split("$").filter(|l| !l.is_empty()).collect();
+
+    for cmd in split_data {
+        dbg!(cmd.trim());
+    }
+}
+
 fn main() {
     println!("Day 7 AoC22!");
 
     let data = fs::read_to_string("test_input.txt").expect("Failed to open file");
 
     dbg!(&data);
+    let part1 = FileInfo::new("/", 0, FileType::Directory, None);
+    parse_input(&data);
 }
