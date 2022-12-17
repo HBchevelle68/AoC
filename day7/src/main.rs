@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, string};
 
 #[derive(Debug)]
 enum FileType {
@@ -11,11 +11,20 @@ struct FileInfo<'a> {
     name: String,
     size: u64,
     ftype: FileType,
-    parent: &'a FileInfo<'a>,
+    parent: Option<&'a FileInfo<'a>>,
     subfiles: Vec<FileInfo<'a>>,
 }
 
 impl<'a> FileInfo<'a> {
+    fn new(name: String, size: u64, ftype: FileType, parent: Option<&'a FileInfo<'a>>) -> FileInfo {
+        FileInfo {
+            name: name,
+            size: size,
+            ftype: ftype,
+            parent: parent,
+            subfiles: vec![],
+        }
+    }
     fn change_directory(self, dir: &str) -> Option<&FileInfo> {
         None
     }

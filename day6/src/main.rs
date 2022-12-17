@@ -1,4 +1,4 @@
-use std::{fs, string};
+use std::fs;
 
 fn is_unique(s: &str) -> Option<(usize, usize, char)> {
     s.chars().enumerate().find_map(|(i, c)| {
