@@ -1,4 +1,4 @@
-use std::{fs, string};
+use std::fs;
 
 #[derive(Debug)]
 enum FileType {
@@ -7,43 +7,54 @@ enum FileType {
 }
 
 #[derive(Debug)]
-struct FileInfo<'a> {
-    name: &'a str,
+struct FileInfo {
+    name: String,
     size: u64,
     ftype: FileType,
-    parent: Option<&'a FileInfo<'a>>,
-    subfiles: Vec<FileInfo<'a>>,
+
+    subfiles: Vec<FileInfo>,
 }
 
-impl<'a> FileInfo<'a> {
-    fn new(
-        name: &str,
-        size: u64,
-        ftype: FileType,
-        parent: Option<&'a FileInfo<'a>>,
-    ) -> FileInfo<'a> {
+impl FileInfo {
+    fn new(name: String, size: u64, ftype: FileType) -> FileInfo {
         FileInfo {
-            name: 'a name,
-            size: size,
-            ftype: ftype,
-            parent: parent,
+            name,
+            size,
+            ftype,
+            //parent,
             subfiles: vec![],
         }
     }
-    fn change_directory(self, dir: &str) -> Option<&FileInfo> {
-        None
+    pub fn change_directory(&mut self, dir: &str) {
+        for (i, d) in self.subfiles.iter().enumerate() {
+            if d.name == dir {}
+        }
     }
-    fn add_file(&mut self) {}
+    //pub fn add_file(&mut self) {}
 }
 
-fn parse_command(cmd: &str) {}
+// fn parse_cd(cmd: &str) {}
 
-fn parse_input(data: &str) {
-    let split_data: Vec<&str> = data.split("$").filter(|l| !l.is_empty()).collect();
+fn parse_input(data: &str, &mut file_sys: &mut FileInfo) {
+    let split_data: Vec<&str> = data
+        .split('$')
+        .filter(|l| !l.is_empty())
+        .map(|s| s.trim())
+        .collect();
 
-    for cmd in split_data {
-        dbg!(cmd.trim());
+    dbg!(&split_data);
+    for cmd in &split_data[1..] {
+        if cmd.starts_with("cd") {
+            let newdir = cmd.strip_prefix("cd").unwrap();
+
+            file_sys.change_directory(&newdir);
+        }
     }
+}
+
+fn part1(data: &str) {
+    let mut part1_fs = FileInfo::new("/".into(), 0, FileType::Directory);
+    parse_input(&data, &mut part1_fs);
 }
 
 fn main() {
@@ -51,7 +62,7 @@ fn main() {
 
     let data = fs::read_to_string("test_input.txt").expect("Failed to open file");
 
-    dbg!(&data);
-    let part1 = FileInfo::new("/", 0, FileType::Directory, None);
-    parse_input(&data);
+    //dbg!(&data);
+
+    part1(&data);
 }
