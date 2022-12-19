@@ -1,68 +1,96 @@
-use std::fs;
+use std::{collections::HashMap, fs, path::PathBuf};
 
-#[derive(Debug)]
-enum FileType {
-    File,
-    Directory,
-}
-
-#[derive(Debug)]
-struct FileInfo {
-    name: String,
-    size: u64,
-    ftype: FileType,
-
-    subfiles: Vec<FileInfo>,
-}
-
-impl FileInfo {
-    fn new(name: String, size: u64, ftype: FileType) -> FileInfo {
-        FileInfo {
-            name,
-            size,
-            ftype,
-            //parent,
-            subfiles: vec![],
-        }
-    }
-    pub fn change_directory(&mut self, dir: &str) {
-        for (i, d) in self.subfiles.iter().enumerate() {
-            if d.name == dir {}
-        }
-    }
-    //pub fn add_file(&mut self) {}
-}
-
-// fn parse_cd(cmd: &str) {}
-
-fn parse_input(data: &str, &mut file_sys: &mut FileInfo) {
-    let split_data: Vec<&str> = data
-        .split('$')
-        .filter(|l| !l.is_empty())
-        .map(|s| s.trim())
-        .collect();
-
-    dbg!(&split_data);
-    for cmd in &split_data[1..] {
-        if cmd.starts_with("cd") {
-            let newdir = cmd.strip_prefix("cd").unwrap();
-
-            file_sys.change_directory(&newdir);
-        }
-    }
-}
+const TOTALDISKSPACE: u32 = 70000000;
+const NEEDEDMIN: u32 = 30000000;
 
 fn part1(data: &str) {
-    let mut part1_fs = FileInfo::new("/".into(), 0, FileType::Directory);
-    parse_input(&data, &mut part1_fs);
+    let mut dir_sizes: HashMap<PathBuf, u32> = HashMap::new();
+    let mut dir_hist: Vec<&str> = vec![];
+
+    for line in data.lines() {
+        if line.starts_with("$ ls") || line.starts_with("dir") {
+            continue;
+        }
+
+        let split_line: Vec<_> = line.split_whitespace().collect();
+        match split_line[..] {
+            ["$", "cd", ".."] => {
+                dir_hist.pop();
+            }
+
+            ["$", "cd", fname] => {
+                dir_hist.push(fname);
+            }
+
+            [size, _name] => {
+                let sz: u32 = size.parse().unwrap();
+                for index in 0..dir_hist.len() {
+                    let path = PathBuf::from_iter(&dir_hist[..=index]);
+                    *dir_sizes.entry(path).or_insert(0) += sz;
+                }
+            }
+
+            _ => {}
+        }
+    }
+    println!(
+        "Part 1: {}",
+        &dir_sizes
+            .into_values()
+            .filter(|sz| *sz <= 100000)
+            .sum::<u32>()
+    );
 }
 
+fn part2(data: &str) {
+    let mut dir_sizes: HashMap<PathBuf, u32> = HashMap::new();
+    let mut dir_hist: Vec<&str> = vec![];
+
+    for line in data.lines() {
+        if line.starts_with("$ ls") || line.starts_with("dir") {
+            continue;
+        }
+
+        let split_line: Vec<_> = line.split_whitespace().collect();
+        match split_line[..] {
+            ["$", "cd", ".."] => {
+                dir_hist.pop();
+            }
+
+            ["$", "cd", fname] => {
+                dir_hist.push(fname);
+            }
+
+            [size, _name] => {
+                let sz: u32 = size.parse().unwrap();
+                for index in 0..dir_hist.len() {
+                    let path = PathBuf::from_iter(&dir_hist[..=index]);
+                    *dir_sizes.entry(path).or_insert(0) += sz;
+                }
+            }
+
+            _ => {}
+        }
+    }
+
+    let available = TOTALDISKSPACE - dir_sizes.get(&PathBuf::from("/")).unwrap();
+
+    println!(
+        "Part 2: {}",
+        &dir_sizes
+            .into_values()
+            .filter(|sz| available + sz >= NEEDEDMIN)
+            .min()
+            .unwrap()
+    );
+}
 fn main() {
     println!("Day 7 AoC22!");
 
-    let data = fs::read_to_string("test_input.txt").expect("Failed to open file");
+    let data = fs::read_to_string("day7_input.txt").expect("Failed to open file");
 
     //dbg!(&data);
 
     part1(&data);
+    part2(&data);
 }
