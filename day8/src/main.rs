@@ -24,6 +24,8 @@ fn testinput(data: &str) {
 
     for r in 1..(TESTLEN - 1) {
         for c in 1..(TESTLEN - 1) {
+
+            
             // Left to right
             let vis = false;
             let tmp_tree_pos = (r, c);
