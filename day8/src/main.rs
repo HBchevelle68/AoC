@@ -1,3 +1,4 @@
+#![feature(iter_advance_by)]
 use std::{collections::HashSet, fs};
 
 const TESTLEN: usize = 5;
@@ -59,6 +60,16 @@ fn testinput(data: &str) {
                     // set false and skip to c+1 to check on the right side
                     vis = false;
                     if tmpcol < col {
+                        // We are on the "left" of [r][c]
+                        println!(
+                            "skipping from [{}][{}] to [{}][{}]",
+                            row,
+                            tmpcol,
+                            row,
+                            col + 1
+                        );
+                        _ = range_iter.advance_by(col - tmpcol);
+                        dbg!(&range_iter);
                         continue;
                     } else {
                         // We are on the right, which can only occur
