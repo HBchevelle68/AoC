@@ -6,6 +6,12 @@ macro_rules! add_unique {
     };
 }
 
+macro_rules! to_isize {
+    ($i:expr) => {
+        $i.trim().parse::<isize>().unwrap()
+    };
+}
+
 fn part1(data: &str) {
     let mut unique_pos: HashSet<(isize, isize)> = HashSet::new();
 
@@ -21,7 +27,20 @@ fn part1(data: &str) {
 
     for h_mvmt in data.lines().map(|line| line.trim().split_at(1)) {
         match h_mvmt.0 {
-            "R" => {}
+            "R" => {
+                // loop for h_mvmt.1 # of times
+                // each step, check if T needs to move
+                // each T movement, call add_unique!()
+                //println!("TEST: {}", to_isize!(h_mvmt.1));
+
+                for m in 0..to_isize!(h_mvmt.1) {
+                    _H.1 += 1;
+
+                    if _T.1.abs() - _H.1.abs() > 1 {
+                        // move T right??
+                    }
+                }
+            }
             "L" => {}
             "U" => {}
             "D" => {}
