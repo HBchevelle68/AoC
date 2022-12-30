@@ -3,6 +3,19 @@ use std::{collections::HashSet, fs};
 
 const MAXLEN: usize = 99;
 
+macro_rules! if_vis_break_or_continue {
+    ($vis : expr) => {
+        match $vis {
+            true => {
+                break;
+            }
+            false => {
+                continue;
+            }
+        }
+    };
+}
+
 fn part1(data: &str) {
     let mut trees: [[u8; MAXLEN]; MAXLEN] = [[0; MAXLEN]; MAXLEN];
     let mut visable_trees: HashSet<(usize, usize)> = HashSet::new();
@@ -31,17 +44,7 @@ fn part1(data: &str) {
                 // Left to right
                 if tmpcol == col {
                     // Same index
-                    match vis {
-                        true => {
-                            // Getting to a true means all to the left
-                            // are smaller and the tree is visable
-                            // Nothing to to, fall through to insert
-                            break;
-                        }
-                        false => {
-                            continue;
-                        }
-                    }
+                    if_vis_break_or_continue!(vis);
                 } else if tmp_tree_val > trees[row][tmpcol] {
                     // Tree visable, continue on
                     vis = true;
@@ -71,17 +74,7 @@ fn part1(data: &str) {
                 // top to bottom
                 if tmprow == row {
                     // Same index
-                    match vis {
-                        true => {
-                            // Getting to a true means all above
-                            // are smaller and the tree is visable
-                            // Nothing to to, fall through to insert
-                            break;
-                        }
-                        false => {
-                            continue;
-                        }
-                    }
+                    if_vis_break_or_continue!(vis);
                 } else if tmp_tree_val > trees[tmprow][col] {
                     // Tree visable, continue on
                     vis = true;
@@ -109,7 +102,77 @@ fn part1(data: &str) {
     }
 
     total += visable_trees.len();
-    println!("TOTAL {}", total);
+    println!("Part 1 TOTAL {}", total);
+}
+
+fn part2(data: &str) {
+    let mut trees: [[u8; MAXLEN]; MAXLEN] = [[0; MAXLEN]; MAXLEN];
+    //let mut visable_trees: HashSet<(usize, usize)> = HashSet::new();
+
+    let mut best_tree: ((usize, usize), usize) = ((0, 0), 0);
+
+    for (r, line) in data.lines().map(|l| l.trim()).enumerate() {
+        for (c, num) in line
+            .chars()
+            .map(|cell| cell.to_digit(10).unwrap() as u8)
+            .enumerate()
+        {
+            trees[r][c] = num;
+        }
+    }
+
+    for row in 1..(MAXLEN - 1) {
+        for col in 1..(MAXLEN - 1) {
+            //let tmp_tree_val = trees[row][col];
+            let up_iter = (0..row).rev();
+            let down_iter = (row + 1)..MAXLEN;
+            let left_iter = (0..col).rev();
+            let right_iter = (col + 1)..MAXLEN;
+
+            let mut up = 0;
+            let mut down = 0;
+            let mut left = 0;
+            let mut right = 0;
+
+            // up
+            for up_row in up_iter {
+                up += 1;
+                if trees[row][col] <= trees[up_row][col] {
+                    break;
+                }
+            }
+            // down
+            for down_row in down_iter {
+                down += 1;
+                if trees[row][col] <= trees[down_row][col] {
+                    break;
+                }
+            }
+            // left
+            for left_col in left_iter {
+                left += 1;
+                if trees[row][col] <= trees[row][left_col] {
+                    break;
+                }
+            }
+            // right
+            for right_col in right_iter {
+                right += 1;
+                if trees[row][col] <= trees[row][right_col] {
+                    break;
+                }
+            }
+
+            if (up * down * left * right) > best_tree.1 {
+                best_tree = ((row, col), (up * down * left * right));
+            }
+        }
+    }
+
+    println!(
+        "Part 2 Best Tree: [{}] [{}] with value {}",
+        best_tree.0 .0, best_tree.0 .0, best_tree.1
+    );
 }
 fn main() {
     println!("Day 8 AoC22!");
@@ -117,4 +180,5 @@ fn main() {
     let data = fs::read_to_string("day8_input.txt").expect("Failed to open file");
 
     part1(&data);
+    part2(&data);
 }
