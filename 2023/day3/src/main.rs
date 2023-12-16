@@ -1,11 +1,13 @@
+use std::collections::HashMap;
+
 fn main() {
     println!("Day1 AoC 2023!");
 
     let data1 = std::fs::read_to_string("data.txt").expect("Failed to open file");
     part_1(data1);
 
-    // let data2 = std::fs::read_to_string("data.txt").expect("Failed to open file");
-    // part_2(data2);
+    let data2 = std::fs::read_to_string("data.txt").expect("Failed to open file");
+    part_2(data2);
 }
 
 // lazy init
@@ -103,4 +105,182 @@ fn part_1(data: String) {
     println!("Sum: {}", sum);
 }
 
-// fn part_2(data: String) {}
+// (row, column_num_start, column_num_end)
+const P2INIT: (usize, usize, usize) = (0, 0, 0);
+
+// This has so much code reuse and code that should be condensed
+// it actually hurts me a little. But this problem sucks and I just
+// want it to be over....
+
+fn part_2(data: String) {
+    let mut data_vec: Vec<Vec<char>> = vec![];
+    let mut len = 0;
+
+    let mut results: HashMap<(usize, usize), Vec<usize>> = HashMap::new();
+
+    for line in data.lines() {
+        if len == 0 {
+            len = line.len();
+        }
+        let mut tmp = vec![];
+        for c in line.chars() {
+            tmp.push(c);
+        }
+        data_vec.push(tmp);
+    }
+
+    let mut nums_found: Vec<(usize, usize, usize)> = vec![];
+    let mut num = P2INIT;
+    let mut found = false;
+
+    // Find numbers
+    for r in 0..140 {
+        // println!("Searching row {} = {:?}", r, &data_vec[r]);
+        for c in 0..140 {
+            if data_vec[r][c].is_ascii_digit() {
+                // Found number
+                // println!("{} is a number", data_vec[r][c]);
+                if num == P2INIT && !found {
+                    // This will account for if the number is the very end
+                    // of the vector without the need for another conditional
+                    found = true;
+                    // println!("num before={:?} Found start at [{},{}]", &num, r, c);
+                    num = (r, c, c);
+                    // println!(" num after={:?}", num);
+                }
+            } else if found {
+                // println!(" {} is NOT a number", data_vec[r][c]);
+                // Not a digit && a num was previously found, reached end of number
+                // only updated the column_num_end member of the tuple
+                // println!("  num={:?} Found end at [{},{}]", &num, r, c);
+                num.2 = c - 1;
+                nums_found.push(num);
+                num = P2INIT;
+                found = false;
+            }
+        }
+    }
+    // dbg!(&nums_found);
+
+    for val in nums_found {
+        let mut sstart = val.1;
+        let mut send = val.2;
+        let mut found = false;
+
+        if sstart != 0 {
+            sstart -= 1;
+        }
+        if send != (len - 1) {
+            send += 1
+        }
+
+        println!("Range is {}..{}", sstart, send);
+        // search above
+        if val.0 != 0 {
+            // println!("Above");
+            let mut tmp = sstart;
+            while tmp <= send {
+                //println!("  Row-{} checking {}", val.0 - 1, &data_vec[val.0 - 1][tmp]);
+                if data_vec[val.0 - 1][tmp] == '*' {
+                    println!("  Found * at [{},{}]", val.0 - 1, tmp);
+
+                    let tmp_num: String = data_vec[val.0][val.1..=val.2]
+                        .to_vec()
+                        .into_iter()
+                        .collect();
+                    let tmp_res = tmp_num.parse::<usize>().unwrap();
+
+                    results
+                        .entry((val.0 - 1, tmp))
+                        .and_modify(|r| r.push(tmp_res))
+                        .or_insert_with(|| vec![tmp_res]);
+
+                    found = true;
+                    break;
+                }
+                tmp += 1;
+            }
+            if found {
+                continue;
+            }
+        }
+        // search below
+        if val.0 != (len - 1) {
+            // println!("Below");
+            let mut tmp = sstart;
+            while tmp <= send {
+                if data_vec[val.0 + 1][tmp] == '*' {
+                    println!("  Found * at [{},{}]", val.0 + 1, tmp);
+
+                    let tmp_num: String = data_vec[val.0][val.1..=val.2]
+                        .to_vec()
+                        .into_iter()
+                        .collect();
+                    let tmp_res = tmp_num.parse::<usize>().unwrap();
+
+                    results
+                        .entry((val.0 + 1, tmp))
+                        .and_modify(|r| r.push(tmp_res))
+                        .or_insert_with(|| vec![tmp_res]);
+
+                    found = true;
+                    break;
+                }
+                tmp += 1;
+            }
+            if found {
+                continue;
+            }
+        }
+        // search left and right
+        if val.1 != 0 {
+            // println!("Left");
+            if data_vec[val.0][val.1 - 1] == '*' {
+                println!("  Found * at [{},{}]", val.0, val.1 - 1);
+
+                let tmp_num: String = data_vec[val.0][val.1..=val.2]
+                    .to_vec()
+                    .into_iter()
+                    .collect();
+                let tmp_res = tmp_num.parse::<usize>().unwrap();
+
+                results
+                    .entry((val.0, val.1 - 1))
+                    .and_modify(|r| r.push(tmp_res))
+                    .or_insert_with(|| vec![tmp_res]);
+
+                found = true;
+                continue;
+            }
+        }
+        if val.2 != (len - 9) {
+            // println!("Right");
+            if data_vec[val.0][val.2 + 1] == '*' {
+                println!("  Found * at [{},{}]", val.0, val.2 + 1);
+
+                let tmp_num: String = data_vec[val.0][val.1..=val.2]
+                    .to_vec()
+                    .into_iter()
+                    .collect();
+                let tmp_res = tmp_num.parse::<usize>().unwrap();
+
+                results
+                    .entry((val.0, val.2 + 1))
+                    .and_modify(|r| r.push(tmp_res))
+                    .or_insert_with(|| vec![tmp_res]);
+
+                found = true;
+                continue;
+            }
+        }
+    }
+    // dbg!(&results);
+    let mut total = 0;
+    for (k, v) in results {
+        if v.len() == 2 {
+            total += v[0] * v[1];
+        }
+    }
+
+    println!("Day 2 total {}", total);
+}
